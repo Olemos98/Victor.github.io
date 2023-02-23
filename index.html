@@ -1,59 +1,44 @@
-<!DOCTYPE HTML>
-<html lang=“pt-br”>
-<head>
- <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-KTBC7V5');</script>
-<!-- End Google Tag Manager -->
-<meta charset=“utf-8”/>
-<meta content=“width=device-width, initial-scale=1, maximum-scale=1” name=“viewport”>
-<title>Teste para analytic com tag manager</title>
-<link href=“css/seu-stylesheet.css” rel=“stylesheet”/>
-<script src=“scripts/seu-script.js”></script>
-</head>
-<body>
- <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KTBC7V5"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
-<header>
-<nav>
-<ul>
-<li>Home</li>
-<li>Contato</li>
-</ul>
-</nav>
-</header>
- 
-<section>
-<article>
-<header>
- <iframe width="1200" height="900" src="https://datastudio.google.com/embed/reporting/3b432b4f-56b4-419e-9118-7df52377609a/page/Dhw5C" frameborder="0" style="border:0" allowfullscreen></iframe>
- <h2>Teste de analises</h2>
-<p>Publicado em <time datetime=“2015-03-09T13:00:24+01:00”>09 de Março de 2015</time> por <a id="button-test-aut" href=“#”>Author</a> – <a id="button-test-coment"href=“#comments”>30 comentários</a></p>
-</header>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-</article>
- 
-<article>
-<header>
-<h2>O título do artigo é aqui</h2>
-<p>Publicado em <time datetime=“2015-03-09T13:00:24+01:00”>09 de Março de 2015</time> por <a href=“#”>Author</a> – <a href=“#comments”>15 comentários</a></p>
-</header>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-</article>
-</section>
- 
-<aside>
-<h2>Entre em contato</h2>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-</aside>
- 
-<footer>
-<p>Copyright 2015 Código Fonte©</p>
-</footer>
-</body>
-</html>
+import json
+from dotenv import load_dotenv
+import os
+import base64
+from requests import post, get
+
+load_dotenv()
+
+client_id = os.getenv("CLIENT_ID")
+client_secret = os.getenv("CLIENT_SECRET")
+
+
+def get_token():
+    auth_string = client_id + ":" + client_secret
+    auth_bytes = auth_string.encode("utf-8")
+    auth_base64 = str(base64.b64encode(auth_bytes), "utf-8")
+
+    url = "https://accounts.spotify.com/api/token"
+    headers = {
+        "Authorization": "Basic " + auth_base64,
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+    data = {"grant_type": "client_credentials"}
+    result = post(url, headers=headers, data=data)
+    json_result = json.loads(result.content)
+    token = json_result["access_token"]
+    return token
+
+def get_auth_header(token):
+    return {"Authorization": "Bearer " + token}
+
+def search_for_artist(token, id_art):
+    url = "https://api.spotify.com/v1/artists/"
+    headers = get_auth_header(token)
+    query = id_art
+        #f"?q={artist_name}&type=artist&limit=1"
+    query_url = url + query
+    result = get(query_url, headers=headers)
+    json_result = json.loads(result.content)
+    print(json_result)
+
+
+token = get_token()
+search_for_artist(token,"7ejjZWVYdXuGjkLsUPW4xL")
